@@ -27,9 +27,11 @@ import NavigationComponent from './components/NavigationComponent.vue';
   position: relative;
   background-color: #f1f1f1;
 }
+
 .container {
   padding: 0 20px;
   max-width: 1140px;
   margin: 0 auto;
+  height: 100vh;
 }
 </style>

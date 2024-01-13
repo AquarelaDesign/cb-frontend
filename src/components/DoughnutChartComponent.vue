@@ -26,7 +26,7 @@ export default {
         axios.get('https://my-json-server.typicode.com/Pierp23/FakeStats/db')
           .then(response => {
             // handle success
-            console.log(response.data.Devices);
+            // console.log(response.data.Devices);
             // this.ageRange = response.data.Devices
             this.chartData = {
               labels: response.data.Devices.map(item => item.os),
@@ -37,7 +37,7 @@ export default {
               }]
             }
             this.loaded = true
-            console.log(this.chartData)
+            // console.log(this.chartData)
           })
           .catch(function (error) {
             // handle error
