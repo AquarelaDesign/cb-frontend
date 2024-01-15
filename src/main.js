@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import { FontAwesomeIcon } from './plugins/font-awesome'
+import 'chartjs-adapter-date-fns';
 
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
