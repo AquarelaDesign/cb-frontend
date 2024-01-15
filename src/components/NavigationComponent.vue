@@ -2,7 +2,7 @@
   <header :class="{ 'scrolled-nav': scrollNav }">
     <nav>
       <div class="branding">
-        <img height="40" src="../assets/images/copybase_logo-branco.svg" alt="" />
+        <img height="40" src="../assets/images/logo.svg" alt="" />
       </div>
       <ul v-show="!mobile" class="navigation">
         <li><router-link class="link" :to="{ name: 'Home' }">Home</router-link></li>
