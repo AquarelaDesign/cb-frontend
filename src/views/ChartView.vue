@@ -80,7 +80,6 @@ export default {
   }
   .p-tabview-panel {
     background-color: rgba(220, 220, 220, 0.95);
-    height: 75vh;
     padding: 10px 10px 10px 10px;
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 1),
