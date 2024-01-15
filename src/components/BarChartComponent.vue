@@ -1,23 +1,21 @@
-<script>
+<script setup>
+import Chart from 'chart.js/auto'
+import { ref, onServerPrefetch, onMounted } from 'vue'
 import { postData } from '../repository/ConnectAPI'
 import { useToast } from 'primevue/usetoast'
-import { geraCoresGrafico, obterMesAno } from '../utils/Utils'
-import { Bar } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  CategoryScale,
-  LinearScale
-} from 'chart.js'
+import { obterMesAno } from '../utils/Utils'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+const chartBar = ref(null)
 
-var loaded = false
-var chartData = {}
-var dadosServidor = []
+onServerPrefetch(async () => {
+  chartBar.value = await getDados()
+})
+
+onMounted(async () => {
+  if (chartBar.value) {
+    chartBar.value = await getDados()
+  }
+})
 
 const getDados = async () => {
   const toast = useToast()
@@ -25,67 +23,57 @@ const getDados = async () => {
     nomeDaColuna: 'dataInicio'
   })
     .then((response) => {
-      // console.log(response)
-      chartData = mountChartData(response.data)
+      return mountChartData(response.data)
     })
     .catch(function (error) {
-      // console.log({ error })
       toast.add({ severity: 'Error', summary: 'danger', detail: error, life: 3000 })
-      loaded = true
+      return null
     })
 }
 
-const mountChartData = (data) => {
-  const bgAtivos = geraCoresGrafico('rgba(106, 158, 218, 0.2)', data.length)
-  const bgCancelados = geraCoresGrafico('rgba(250, 95, 73, 0.2)', data.length)
-  const bdAtivos = geraCoresGrafico('rgba(106, 158, 218, 1)', data.length)
-  const bdCancelados = geraCoresGrafico('rgba(250, 95, 73, 1)', data.length)
+const mountChartData = (dataServer) => {
+  const bgAtivos = ['rgba(106, 158, 218, 0.2)']
+  const bgCancelados = ['rgba(250, 95, 73, 0.2)']
+  const bdAtivos = ['rgba(106, 158, 218, 1)']
+  const bdCancelados = ['rgba(250, 95, 73, 1)']
 
-  // console.log({ bgAtivos, bgCancelados, bdAtivos, bdCancelados })
-  dadosServidor = data
-
-  const chartDataReturn = {
-    labels: data.map((item) => obterMesAno(new Date(item.Mes))),
+  const chartData = {
+    labels: dataServer.map((item) => obterMesAno(new Date(item.Mes))),
     datasets: [
       {
         label: 'Ativos',
         backgroundColor: bgAtivos,
         borderColor: bdAtivos,
         borderWidth: 1,
-        data: data.map((item) => item.ativa)
+        data: dataServer.map((item) => item.ativa)
       },
       {
         label: 'Cancelados',
         backgroundColor: bgCancelados,
         borderColor: bdCancelados,
         borderWidth: 1,
-        data: data.map((item) => item.cancelada)
+        data: dataServer.map((item) => item.cancelada)
       }
     ]
   }
-  loaded = true
-  return chartDataReturn
-}
 
-const chartOptions = {
-  responsive: true,
-  locale: 'pt-BR',
-  scales: {
-    y: {
-      beginAtZero: true,
-      grace: 1
-    }
-  },
-  plugins: {
-    tooltip: {
-      callbacks: {
-        beforeFooter: (context) => {
-          // console.log(context, context[0].dataIndex, dadosServidor[context[0].dataIndex])
-          return 'MRR: ' + Math.round(dadosServidor[context[0].dataIndex].mrr).toFixed(2)
+  const chartConfig = {
+    type: 'bar',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      locale: 'pt-BR',
+      scales: {
+        y: {
+          beginAtZero: true
         }
       }
-    }
+    },
+    plugins: [topline]
   }
+
+  return mountChart(chartConfig)
 }
 
 const topline = {
@@ -113,42 +101,18 @@ const topline = {
   }
 }
 
-const chartPlugins = [topline]
-
-export default {
-  name: 'BarChart',
-  components: { Bar },
-  data() {
-    return {
-      loaded,
-      chartData,
-      chartOptions,
-      chartPlugins
-    }
-  },
-  methods: { getDados },
-  created() {
-    this.getDados()
-  }
+const mountChart = (chartConfig) => {
+  const ctx = document.getElementById('BarChart')
+  const BarChart = new Chart(ctx, chartConfig)
+  return BarChart
 }
 </script>
 
 <template>
   <PToast />
   <div class="grid grid-cols-12 gap-6">
-    <Bar
-      v-if="loaded"
-      class="chart chart--donut"
-      id="barAtivosCancelados"
-      :options="chartOptions"
-      :plugins="chartPlugins"
-      :data="chartData"
-    />
+    <canvas id="BarChart" ref="chartBar" class="w-max h-max"></canvas>
   </div>
 </template>
 
-<style scoped>
-.chart {
-  height: 400px;
-}
-</style>
+<style scoped></style>
